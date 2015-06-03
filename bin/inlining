@@ -4,7 +4,7 @@
 
 var fs = require("fs");
 
-var inlining = require("../index");
+var inlining = require("../");
 
 var html = process.argv[2];
 var stdin;
