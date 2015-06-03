@@ -21,6 +21,7 @@ function buildCSSText(decls) {
 module.exports = function (css, html, callback) {
   jsdom.env(html, function (errors, window) {
     var document = window.document;
+    var body = document.body;
     postcss.parse(css).eachRule(function (rule) {
       var cssText = buildCSSText(rule.nodes);
       list.comma(rule.selector).forEach(function (selector) {
@@ -31,6 +32,11 @@ module.exports = function (css, html, callback) {
 
         for (i = 0; i < l; i++) {
           elm = elms[i];
+
+          if (elm !== body && !body.contains(elm)) {
+            continue;
+          }
+
           elm.style.cssText += cssText;
         }
       });
