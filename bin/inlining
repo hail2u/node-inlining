@@ -6,8 +6,8 @@ var fs = require("fs");
 
 var inlining = require("../index");
 
-var html = process.argv[2];
 var css = process.argv[3];
+var html = process.argv[2];
 
 inlining(
   fs.readFileSync(css, "utf8"),

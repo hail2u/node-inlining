@@ -11,8 +11,8 @@ var list = postcss.list;
 
 function inlineImage(value, from) {
   return list.comma(value).map(function (v) {
-    var p;
     var url = balanced("url(", ")", v);
+    var p;
 
     if (url) {
       p = url.body.replace(/^("|')?(.*)\1$/, "$2");
@@ -57,10 +57,10 @@ module.exports = function (css, html, pathCSS, pathHTML, callback) {
   }
 
   jsdom.env(html, function (errors, window) {
+    var root = postcss.parse(css);
     var document = window.document;
     var body = document.body;
     var remain = document.createElement("style");
-    var root = postcss.parse(css);
     root.eachRule(function (rule) {
       if (rule.parent.type !== "root") {
         return;
@@ -68,10 +68,10 @@ module.exports = function (css, html, pathCSS, pathHTML, callback) {
 
       var cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
       list.comma(rule.selector).forEach(function (selector) {
-        var elm;
         var elms;
-        var i;
         var l;
+        var i;
+        var elm;
         var style;
 
         try {
