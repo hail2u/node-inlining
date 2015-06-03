@@ -38,7 +38,13 @@ function buildCSSText(decls, root) {
       return;
     }
 
-    cssText += decl.prop + ":" + inlineImage(decl.value, root) + ";";
+    cssText += decl.prop + ":" + inlineImage(decl.value, root);
+
+    if (decl.important) {
+      cssText += " !important";
+    }
+
+    cssText += ";";
   });
 
   return cssText;
