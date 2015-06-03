@@ -30,3 +30,9 @@ p:last-child {
 #test {
   background-color: #ff0;
 }
+
+@media (min-width: 100px) {
+  body {
+    background-color: red;
+  }
+}
