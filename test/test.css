@@ -35,9 +35,9 @@ p:last-child {
 }
 
 /* Ignore @media */
-@media (min-width: 100px) {
-  body {
-    background-color: red;
+@media (min-width: 1024px) {
+  html {
+    font-size: 112.5%;
   }
 }
 
