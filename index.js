@@ -1,24 +1,46 @@
 "use strict";
 
+var balanced = require("balanced-match");
+var fs = require("fs");
 var jsdom = require("jsdom");
+var mime = require("mime");
+var path = require("path");
 var postcss = require("postcss");
 
 var list = postcss.list;
 
-function buildCSSText(decls) {
+function toDataURL(p) {
+  return "data:" + mime.lookup(p) + ";base64," +
+    fs.readFileSync(p).toString("base64");
+}
+
+function inlineImage(value, from) {
+  return list.comma(value).map(function (v) {
+    var url = balanced("url(", ")", v);
+
+    if (url) {
+      url.body = url.body.replace(/^("|')?(.*)\1$/, "$2");
+      v = url.pre + toDataURL(path.resolve(from, url.body)) + url.post;
+    }
+
+    return v;
+  }).join(",");
+}
+
+function buildCSSText(decls, root) {
   var cssText = "";
   decls.forEach(function (decl) {
     if (decl.type !== "decl") {
       return;
     }
 
-    cssText += decl.prop + ":" + decl.value + ";";
+    cssText += decl.prop + ":" + inlineImage(decl.value, root) + ";";
   });
 
   return cssText;
 }
 
-module.exports = function (css, html, callback) {
+module.exports = function (css, html, pathCSS, pathHTML, callback) {
   jsdom.env(html, function (errors, window) {
     var document = window.document;
     var body = document.body;
@@ -29,7 +51,7 @@ module.exports = function (css, html, callback) {
         return;
       }
 
-      var cssText = buildCSSText(rule.nodes);
+      var cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
       list.comma(rule.selector).forEach(function (selector) {
         var elm;
         var elms;
