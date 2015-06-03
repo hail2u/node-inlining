@@ -6,6 +6,7 @@ var jsdom = require("jsdom");
 var mime = require("mime");
 var path = require("path");
 var postcss = require("postcss");
+var serializeDocument = require("jsdom").serializeDocument;
 
 var list = postcss.list;
 
@@ -120,6 +121,6 @@ module.exports = function (html, pathHTML, callback) {
       }
     }
 
-    callback(document.documentElement.innerHTML);
+    callback(serializeDocument(document));
   });
 };
