@@ -1,0 +1,16 @@
+{
+  "name": "inlining",
+  "description": "Inline external CSS file into a HTML file.",
+  "version": "0.1.0",
+  "author": "Kyo Nagashima <hail2u@gmail.com> (https://kyonagashima.com/)",
+  "bin": {
+    "inlining": "bin/inlining"
+  },
+  "dependencies": {
+    "jsdom": "^5.4.3",
+    "postcss": "^4.1.11"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "private": true
+}
