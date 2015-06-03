@@ -88,8 +88,10 @@ function inlineCSS(css, pathCSS, document) {
     rule.removeSelf();
   });
 
-  remain.appendChild(document.createTextNode(root.toString()));
-  document.head.appendChild(remain);
+  if (root.nodes.length > 0) {
+    remain.appendChild(document.createTextNode(root.toString()));
+    document.head.appendChild(remain);
+  }
 
   return document;
 }
