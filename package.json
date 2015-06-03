@@ -16,9 +16,13 @@
     "postcss": "^4.1.11"
   },
   "devDependencies": {},
-  "directories": {
-    "test": "test"
-  },
+  "files": [
+    "README.md",
+    "bin",
+    "index.js",
+    "package.json",
+    "test"
+  ],
   "homepage": "https://github.com/hail2u/node-inlining#readme",
   "keywords": [
     "css",
