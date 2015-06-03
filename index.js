@@ -15,7 +15,7 @@ function inlineImage(value, from) {
     var p;
 
     if (url) {
-      p = url.body.replace(/^("|')?(.*)\1$/, "$2");
+      p = url.body.replace(/^\s*("|')?\s*(.*)\s*\1\s*$/, "$2");
       p = path.resolve(from, p);
 
       if (fs.existsSync(p)) {
