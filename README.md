@@ -1,7 +1,7 @@
 inlining
 ========
 
-Inline external CSS to a HTML file.
+Inline external CSS files referenced by `link` element to a HTML file.
 
 
 INSTALL
@@ -13,7 +13,7 @@ INSTALL
 USAGE
 -----
 
-    $ inlining input.html input.css >output.html
+    $ inlining input.html >output.html
 
 
 LICENSE

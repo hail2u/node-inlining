@@ -1,6 +1,6 @@
 {
   "name": "inlining",
-  "description": "Inline external CSS file into a HTML file.",
+  "description": "Inline external CSS files referenced by `link` element to a HTML file.",
   "version": "0.1.0",
   "author": "Kyo Nagashima <hail2u@gmail.com> (https://kyonagashima.com/)",
   "bin": {

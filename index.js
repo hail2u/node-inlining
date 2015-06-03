@@ -43,66 +43,81 @@ function buildCSSText(decls, root) {
   return cssText;
 }
 
-module.exports = function (css, html, pathCSS, pathHTML, callback) {
-  if (typeof pathCSS === "function") {
-    callback = pathCSS;
-    pathCSS = "main.css";
-    pathHTML = "index.html";
-  }
+function inlineCSS(css, pathCSS, document) {
+  var root = postcss.parse(css);
+  var body = document.body;
+  var remain = document.createElement("style");
+  root.eachRule(function (rule) {
+    if (rule.parent.type !== "root") {
+      return;
+    }
 
+    var cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
+    list.comma(rule.selector).forEach(function (selector) {
+      var elms;
+      var l;
+      var i;
+      var elm;
+      var style;
+
+      try {
+        elms = document.querySelectorAll(selector);
+      } catch (e) {
+        return;
+      }
+
+      l = elms.length;
+
+      for (i = 0; i < l; i++) {
+        elm = elms[i];
+
+        if (elm !== body && !body.contains(elm)) {
+          continue;
+        }
+
+        style = elm.getAttribute("style");
+
+        if (!style) {
+          style = "";
+        }
+
+        elm.setAttribute("style", style + cssText);
+      }
+    });
+
+    rule.removeSelf();
+  });
+
+  remain.appendChild(document.createTextNode(root.toString()));
+  document.head.appendChild(remain);
+
+  return document;
+}
+
+module.exports = function (html, pathHTML, callback) {
   if (typeof pathHTML === "function") {
     callback = pathHTML;
     pathHTML = "index.html";
   }
 
   jsdom.env(html, function (errors, window) {
-    var root = postcss.parse(css);
     var document = window.document;
-    var body = document.body;
-    var remain = document.createElement("style");
-    root.eachRule(function (rule) {
-      if (rule.parent.type !== "root") {
-        return;
+    var elms = document.querySelectorAll('link[rel="stylesheet"]');
+    var l = elms.length;
+    var i;
+    var elm;
+    var href;
+
+    for (i = 0; i < l; i++) {
+      elm = elms[i];
+      href = path.resolve(path.dirname(pathHTML), elm.href);
+
+      if (fs.existsSync(href)) {
+        elm.parentNode.removeChild(elm);
+        document = inlineCSS(fs.readFileSync(href, "utf8"), href, document);
       }
+    }
 
-      var cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
-      list.comma(rule.selector).forEach(function (selector) {
-        var elms;
-        var l;
-        var i;
-        var elm;
-        var style;
-
-        try {
-          elms = document.querySelectorAll(selector);
-        } catch (e) {
-          return;
-        }
-
-        l = elms.length;
-
-        for (i = 0; i < l; i++) {
-          elm = elms[i];
-
-          if (elm !== body && !body.contains(elm)) {
-            continue;
-          }
-
-          style = elm.getAttribute("style");
-
-          if (!style) {
-            style = "";
-          }
-
-          elm.setAttribute("style", style + cssText);
-        }
-      });
-
-      rule.removeSelf();
-    });
-
-    remain.appendChild(document.createTextNode(root.toString()));
-    document.head.appendChild(remain);
     callback(document.documentElement.innerHTML);
   });
 };
