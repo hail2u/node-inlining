@@ -32,9 +32,18 @@ module.exports = function (css, html, callback) {
       var cssText = buildCSSText(rule.nodes);
       list.comma(rule.selector).forEach(function (selector) {
         var elm;
-        var elms = document.querySelectorAll(selector);
+        var elms;
         var i;
-        var l = elms.length;
+        var l;
+        var style;
+
+        try {
+          elms = document.querySelectorAll(selector);
+        } catch (e) {
+          return;
+        }
+
+        l = elms.length;
 
         for (i = 0; i < l; i++) {
           elm = elms[i];
