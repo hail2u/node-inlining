@@ -15,6 +15,10 @@ USAGE
 
     $ inlining input.html >output.html
 
+Use single dash for reading HTML from a standard input:
+
+    $ cat input.html | inlining - >output.html
+
 
 LICENSE
 -------

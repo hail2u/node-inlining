@@ -7,11 +7,30 @@ var fs = require("fs");
 var inlining = require("../index");
 
 var html = process.argv[2];
+var stdin;
+var data = "";
 
-inlining(
-  fs.readFileSync(html, "utf8"),
-  html,
-  function (res) {
-    console.log(res);
-  }
-);
+if (html === "-") {
+  stdin = process.openStdin();
+  stdin.setEncoding("utf-8");
+  stdin.on("data", function (chunk) {
+    data += chunk;
+  });
+  stdin.on("end", function () {
+    inlining(
+      data,
+      html,
+      function (res) {
+        console.log(res);
+      }
+    );
+  });
+} else {
+  inlining(
+    fs.readFileSync(html, "utf8"),
+    html,
+    function (res) {
+      console.log(res);
+    }
+  );
+}
