@@ -20,7 +20,8 @@ function inlineImage(value, from) {
 
     if (url) {
       url.body = url.body.replace(/^("|')?(.*)\1$/, "$2");
-      v = url.pre + toDataURL(path.resolve(from, url.body)) + url.post;
+      v = "url(" + url.pre + toDataURL(path.resolve(from, url.body)) +
+        url.post + ")";
     }
 
     return v;
