@@ -18,13 +18,12 @@ function inlineImage(value, from) {
       p = url.body.replace(/^("|')?(.*)\1$/, "$2");
       p = path.resolve(from, p);
 
-      try {
-        fs.accessSync(p, fs.F_OK);
-        v = url.pre + "url(data:" + mime.lookup(p) + ";base64," +
-          fs.readFileSync(p).toString("base64") + ")" + url.post;
-      } catch (e) {
-        v = url.pre + "url(" + url.body + ")" + url.post;
+      if (fs.existsSync(p)) {
+        url.body = "data:" + mime.lookup(p) + ";base64," +
+          fs.readFileSync(p).toString("base64");
       }
+
+      v = url.pre + "url(" + url.body + ")" + url.post;
     }
 
     return v;
