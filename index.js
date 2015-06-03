@@ -121,8 +121,9 @@ module.exports = function (html, pathHTML, callback) {
     var i;
     var elm;
     var links = document.querySelectorAll('link[rel="stylesheet"]');
-    var href;
     var style;
+    var href;
+    var dir = path.dirname(pathHTML);
 
     for (i = 0; i < l; i++) {
       elm = elms[i];
@@ -137,7 +138,7 @@ module.exports = function (html, pathHTML, callback) {
 
     for (i = 0; i < l; i++) {
       elm = links[i];
-      href = path.resolve(path.dirname(pathHTML), elm.href);
+      href = path.resolve(dir, elm.href);
 
       if (fs.existsSync(href)) {
         elm.parentNode.removeChild(elm);
@@ -157,6 +158,19 @@ module.exports = function (html, pathHTML, callback) {
 
       elm.setAttribute("style", style + elm.getAttribute("_style"));
       elm.removeAttribute("_style");
+    }
+
+    elms = document.images;
+    l = elms.length;
+
+    for (i = 0; i < l; i++) {
+      elm = elms[i];
+      href = path.resolve(dir, elm.src.replace(/^file:\/\//, ""));
+
+      if (fs.existsSync(href)) {
+        elm.src = "data:" + mime.lookup(href) + ";base64," +
+          fs.readFileSync(href).toString("base64");
+      }
     }
 
     callback(jsdom.serializeDocument(document));
