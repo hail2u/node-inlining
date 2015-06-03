@@ -8,17 +8,16 @@ var inlining = require("../index");
 
 var html = process.argv[2];
 var stdin;
-var data = "";
 
 if (html === "-") {
+  html = "";
   stdin = process.openStdin();
   stdin.setEncoding("utf-8");
   stdin.on("data", function (chunk) {
-    data += chunk;
+    html += chunk;
   });
   stdin.on("end", function () {
     inlining(
-      data,
       html,
       function (res) {
         console.log(res);
