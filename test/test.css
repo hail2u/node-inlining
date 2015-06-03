@@ -4,7 +4,10 @@
 }
 
 body {
+  -webkit-font-feature-settings: "kern" 1, "liga" 1, "lnum" 1, "pnum" 1;
+  font-feature-settings: "kern" 1, "liga" 1, "lnum" 1, "pnum" 1;
   font-family: Helvetica Neue, Calibri, sans-serif;
+  foo: bar;
   line-height: 1.5;
 }
 
@@ -31,8 +34,19 @@ p:last-child {
   background-color: #ff0;
 }
 
+/* Ignore @media */
 @media (min-width: 100px) {
   body {
     background-color: red;
   }
+}
+
+/* Remove unused styles */
+test {
+  background-color: red;
+}
+
+/* Remove unknown selector ruleset */
+::-moz-selection {
+  background-color: red;
 }

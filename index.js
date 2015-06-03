@@ -52,7 +52,13 @@ module.exports = function (css, html, callback) {
             continue;
           }
 
-          elm.style.cssText += cssText;
+          style = elm.getAttribute("style");
+
+          if (!style) {
+            style = "";
+          }
+
+          elm.setAttribute("style", style + cssText);
         }
       });
 
