@@ -45,6 +45,17 @@ function buildCSSText(decls, root) {
 }
 
 module.exports = function (css, html, pathCSS, pathHTML, callback) {
+  if (typeof pathCSS === "function") {
+    callback = pathCSS;
+    pathCSS = "main.css";
+    pathHTML = "index.html";
+  }
+
+  if (typeof pathHTML === "function") {
+    callback = pathHTML;
+    pathHTML = "index.html";
+  }
+
   jsdom.env(html, function (errors, window) {
     var document = window.document;
     var body = document.body;
