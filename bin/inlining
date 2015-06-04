@@ -5,31 +5,57 @@
 var fs = require("fs");
 
 var inlining = require("../");
+var pkg = require("../package.json");
 
+var binname = Object.keys(pkg.bin)[0];
 var html = process.argv[2];
-var stdin;
 
-if (html === "-") {
-  html = "";
-  stdin = process.openStdin();
-  stdin.setEncoding("utf-8");
-  stdin.on("data", function (chunk) {
-    html += chunk;
-  });
-  stdin.on("end", function () {
+switch (html) {
+  case "--version":
+  case "-v":
+    console.log(binname + " v" + pkg.version);
+
+    break;
+
+  case "--help":
+  case "-h":
+    console.log("Usage: " + binname + " INPUT");
+    console.log("");
+    console.log("Description:");
+    console.log("  " + pkg.description);
+    console.log("");
+    console.log("Options:");
+    console.log("  -h, --help     Show this message.");
+    console.log("  -v, --version  Print version information.");
+    console.log("");
+    console.log("Use a single dash for INPUT to read CSS from standard input.");
+
+    break;
+
+  case "-":
+    var stdin = process.openStdin();
+    html = "";
+    stdin.setEncoding("utf-8");
+    stdin.on("data", function (chunk) {
+      html += chunk;
+    });
+    stdin.on("end", function () {
+      inlining(
+        html,
+        function (res) {
+          console.log(res);
+        }
+      );
+    });
+
+    break;
+
+  default:
     inlining(
+      fs.readFileSync(html, "utf8"),
       html,
       function (res) {
         console.log(res);
       }
     );
-  });
-} else {
-  inlining(
-    fs.readFileSync(html, "utf8"),
-    html,
-    function (res) {
-      console.log(res);
-    }
-  );
 }
