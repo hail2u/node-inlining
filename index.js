@@ -57,6 +57,10 @@ function inlineCSS(css, pathCSS, document) {
     var cssText;
 
     if (rule.parent.type !== "root") {
+      rule.nodes.forEach(function (decl) {
+        decl.value = inlineImage(decl.value, path.dirname(pathCSS));
+      });
+
       return;
     }
 

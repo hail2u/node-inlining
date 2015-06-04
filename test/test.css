@@ -52,3 +52,10 @@ test {
 ::-moz-selection {
   background-color: red;
 }
+
+/* Inline images in @media and others */
+@media (min-width: 5120px) {
+  .test {
+    background-image: url("./test.svg");
+  }
+}
