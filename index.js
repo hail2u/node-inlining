@@ -6,18 +6,17 @@ var jsdom = require("jsdom");
 var mime = require("mime");
 var path = require("path");
 var postcss = require("postcss");
-var serializeDocument = require("jsdom").serializeDocument;
 
 var list = postcss.list;
 
-function inlineImage(value, from) {
+function inlineImage(value, root) {
   return list.comma(value).map(function (v) {
     var url = balanced("url(", ")", v);
     var p;
 
     if (url) {
       p = url.body.replace(/^\s*("|')?\s*(.*)\s*\1\s*$/, "$2");
-      p = path.resolve(from, p);
+      p = path.resolve(root, p);
 
       if (fs.existsSync(p)) {
         url.body = "data:" + mime.lookup(p) + ";base64," +
@@ -55,11 +54,13 @@ function inlineCSS(css, pathCSS, document) {
   var body = document.body;
   var remain = document.createElement("style");
   root.eachRule(function (rule) {
+    var cssText;
+
     if (rule.parent.type !== "root") {
       return;
     }
 
-    var cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
+    cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
     list.comma(rule.selector).forEach(function (selector) {
       var elms;
       var l;
@@ -91,7 +92,6 @@ function inlineCSS(css, pathCSS, document) {
         elm.setAttribute("style", style + cssText);
       }
     });
-
     rule.removeSelf();
   });
 
@@ -127,6 +127,6 @@ module.exports = function (html, pathHTML, callback) {
       }
     }
 
-    callback(serializeDocument(document));
+    callback(jsdom.serializeDocument(document));
   });
 };
