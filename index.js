@@ -50,21 +50,22 @@ function buildCSSText(decls, root) {
 }
 
 function inlineCSS(css, pathCSS, document) {
-  var root = postcss.parse(css);
+  var dir = path.dirname(pathCSS);
   var body = document.body;
   var remain = document.createElement("style");
-  root.eachRule(function (rule) {
+  css = postcss.parse(css);
+  css.eachRule(function (rule) {
     var cssText;
 
     if (rule.parent.type !== "root") {
       rule.nodes.forEach(function (decl) {
-        decl.value = inlineImage(decl.value, path.dirname(pathCSS));
+        decl.value = inlineImage(decl.value, dir);
       });
 
       return;
     }
 
-    cssText = buildCSSText(rule.nodes, path.dirname(pathCSS));
+    cssText = buildCSSText(rule.nodes, dir);
     list.comma(rule.selector).forEach(function (selector) {
       var elms;
       var l;
@@ -99,8 +100,8 @@ function inlineCSS(css, pathCSS, document) {
     rule.removeSelf();
   });
 
-  if (root.nodes.length > 0) {
-    remain.appendChild(document.createTextNode(root.toString()));
+  if (css.nodes.length > 0) {
+    remain.appendChild(document.createTextNode(css.toString()));
     document.head.appendChild(remain);
   }
 
