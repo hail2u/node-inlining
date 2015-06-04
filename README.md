@@ -54,7 +54,7 @@ You will get this HTML file with this package:
 INSTALL
 -------
 
-    $ npm install -g hail2u/node-inlining
+    $ npm install -g inlining
 
 
 USAGE
