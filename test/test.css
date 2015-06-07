@@ -36,6 +36,10 @@ p:last-child {
   background-color: #ff0;
 }
 
+p:nth-child(5) {
+  color: red;
+}
+
 /* Ignore @media */
 @media (min-width: 1024px) {
   html {

@@ -116,20 +116,47 @@ module.exports = function (html, pathHTML, callback) {
 
   jsdom.env(html, function (errors, window) {
     var document = window.document;
-    var elms = document.querySelectorAll('link[rel="stylesheet"]');
+    var elms = document.querySelectorAll("[style]");
     var l = elms.length;
     var i;
     var elm;
+    var links = document.querySelectorAll('link[rel="stylesheet"]');
     var href;
+    var style;
 
     for (i = 0; i < l; i++) {
       elm = elms[i];
+
+      if (elm.hasAttribute("style")) {
+        elm.setAttribute("_style", elm.getAttribute("style"));
+        elm.removeAttribute("style");
+      }
+    }
+
+    l = links.length;
+
+    for (i = 0; i < l; i++) {
+      elm = links[i];
       href = path.resolve(path.dirname(pathHTML), elm.href);
 
       if (fs.existsSync(href)) {
         elm.parentNode.removeChild(elm);
         document = inlineCSS(fs.readFileSync(href, "utf8"), href, document);
       }
+    }
+
+    l = elms.length;
+
+    for (i = 0; i < l; i++) {
+      elm = elms[i];
+      style = elm.getAttribute("style");
+
+      if (!style) {
+        style = "";
+      }
+
+      elm.setAttribute("style", style + elm.getAttribute("_style"));
+      elm.removeAttribute("_style");
     }
 
     callback(jsdom.serializeDocument(document));
