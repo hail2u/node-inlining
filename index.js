@@ -125,14 +125,13 @@ module.exports = function (html, pathHTML, callback) {
     var i;
     var elm;
     var links = document.querySelectorAll('link[rel="stylesheet"]');
-    var style;
     var href;
     var dir = path.dirname(pathHTML);
 
     for (i = 0; i < l; i++) {
       elm = elms[i];
       elm.setAttribute("_style", elm.getAttribute("style"));
-      elm.removeAttribute("style");
+      elm.setAttribute("style", "");
     }
 
     l = links.length;
@@ -151,13 +150,10 @@ module.exports = function (html, pathHTML, callback) {
 
     for (i = 0; i < l; i++) {
       elm = elms[i];
-      style = elm.getAttribute("style");
-
-      if (!style) {
-        style = "";
-      }
-
-      elm.setAttribute("style", style + elm.getAttribute("_style"));
+      elm.setAttribute(
+        "style",
+        elm.getAttribute("style") + elm.getAttribute("_style")
+      );
       elm.removeAttribute("_style");
     }
 
