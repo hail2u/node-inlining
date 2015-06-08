@@ -121,14 +121,28 @@ module.exports = function (html, pathHTML, callback) {
     var i;
     var elm;
     var href;
+    var dir = path.dirname(pathHTML);
 
     for (i = 0; i < l; i++) {
       elm = elms[i];
-      href = path.resolve(path.dirname(pathHTML), elm.href);
+      href = path.resolve(dir, elm.href);
 
       if (fs.existsSync(href)) {
         elm.parentNode.removeChild(elm);
         document = inlineCSS(fs.readFileSync(href, "utf8"), href, document);
+      }
+    }
+
+    elms = document.images;
+    l = elms.length;
+
+    for (i = 0; i < l; i++) {
+      elm = elms[i];
+      href = path.resolve(dir, elm.src.replace(/^file:\/\//, ""));
+
+      if (fs.existsSync(href)) {
+        elm.src = "data:" + mime.lookup(href) + ";base64," +
+          fs.readFileSync(href).toString("base64");
       }
     }
 
