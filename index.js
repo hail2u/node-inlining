@@ -131,11 +131,8 @@ module.exports = function (html, pathHTML, callback) {
 
     for (i = 0; i < l; i++) {
       elm = elms[i];
-
-      if (elm.hasAttribute("style")) {
-        elm.setAttribute("_style", elm.getAttribute("style"));
-        elm.removeAttribute("style");
-      }
+      elm.setAttribute("_style", elm.getAttribute("style"));
+      elm.removeAttribute("style");
     }
 
     l = links.length;
