@@ -9,6 +9,11 @@ var postcss = require("postcss");
 
 var list = postcss.list;
 
+function toDataURL(p) {
+  return "data:" + mime.lookup(p) + ";base64," +
+    fs.readFileSync(p).toString("base64");
+}
+
 function inlineImage(value, root) {
   return list.comma(value).map(function (v) {
     var url = balanced("url(", ")", v);
@@ -19,8 +24,7 @@ function inlineImage(value, root) {
       p = path.resolve(root, p);
 
       if (fs.existsSync(p)) {
-        url.body = "data:" + mime.lookup(p) + ";base64," +
-          fs.readFileSync(p).toString("base64");
+        url.body = toDataURL(p);
       }
 
       v = url.pre + "url(" + url.body + ")" + url.post;
@@ -168,8 +172,7 @@ module.exports = function (html, pathHTML, callback) {
       href = path.resolve(dir, elm.src.replace(/^file:\/\//, ""));
 
       if (fs.existsSync(href)) {
-        elm.src = "data:" + mime.lookup(href) + ";base64," +
-          fs.readFileSync(href).toString("base64");
+        elm.src = toDataURL(href);
       }
     }
 
