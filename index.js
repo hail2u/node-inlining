@@ -16,38 +16,34 @@ function toDataURL(p) {
 }
 
 function inlineImage(value, root) {
-  return list.comma(value).map(function (v) {
-    var url = balanced("url(", ")", v);
-    var p;
+  var url = balanced("url(", ")", value);
+  var p;
 
-    if (url) {
-      p = url.body.replace(/^\s*("|')?\s*(.*)\s*\1\s*$/, "$2");
-      p = path.resolve(root, p);
+  if (url) {
+    p = url.body.replace(/^\s*("|')?\s*(.*)\s*\1\s*$/, "$2");
+    p = path.resolve(root, p);
 
-      if (fs.existsSync(p)) {
-        url.body = toDataURL(p);
-      }
-
-      v = url.pre + "url(" + url.body + ")" + url.post;
+    if (fs.existsSync(p)) {
+      url.body = toDataURL(p);
     }
 
-    return v;
-  }).join(",");
+    value = url.pre + "url(" + url.body + ")" + url.post;
+  }
+
+  return value;
 }
 
 function normalizeColor(value) {
-  return list.comma(value).map(function (v) {
-    return list.space(v).map(function (c) {
-      if (
-        /^(rgb|hsl)a?\(.*\)$/i.test(c) ||
-        /^#[0-9a-f]{3}$/i.test(c)
-      ) {
-        return onecolor(c).hex();
-      }
+  return list.space(value).map(function (v) {
+    if (
+      /^(rgb|hsl)a?\(.*\)$/i.test(v) ||
+      /^#[0-9a-f]{3}$/i.test(v)
+    ) {
+      return onecolor(v).hex();
+    }
 
-      return c;
-    }).join(" ");
-  }).join(",");
+    return v;
+  }).join(" ");
 }
 
 function buildCSSText(decls, root) {
@@ -57,8 +53,12 @@ function buildCSSText(decls, root) {
       return;
     }
 
-    decl.value = normalizeColor(decl.value);
-    cssText += decl.prop + ":" + inlineImage(decl.value, root);
+    cssText += decl.prop + ":" + list.comma(decl.value).map(function (v) {
+      v = normalizeColor(v);
+      v = inlineImage(v, root);
+
+      return v;
+    }).join(",");
 
     if (decl.important) {
       cssText += " !important";
