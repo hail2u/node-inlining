@@ -37,7 +37,7 @@ p:last-child {
 }
 
 p:nth-child(5) {
-  color: red;
+  color: rgb(255, 0, 0);
 }
 
 /* Ignore @media */

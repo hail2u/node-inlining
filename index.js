@@ -4,6 +4,7 @@ var balanced = require("balanced-match");
 var fs = require("fs");
 var jsdom = require("jsdom");
 var mime = require("mime");
+var onecolor = require("onecolor");
 var path = require("path");
 var postcss = require("postcss");
 
@@ -34,6 +35,21 @@ function inlineImage(value, root) {
   }).join(",");
 }
 
+function normalizeColor(value) {
+  return list.comma(value).map(function (v) {
+    return list.space(v).map(function (c) {
+      if (
+        /^(rgb|hsl)a?\(.*\)$/i.test(c) ||
+        /^#[0-9a-f]{3}$/i.test(c)
+      ) {
+        return onecolor(c).hex();
+      }
+
+      return c;
+    }).join(" ");
+  }).join(",");
+}
+
 function buildCSSText(decls, root) {
   var cssText = "";
   decls.forEach(function (decl) {
@@ -41,6 +57,7 @@ function buildCSSText(decls, root) {
       return;
     }
 
+    decl.value = normalizeColor(decl.value);
     cssText += decl.prop + ":" + inlineImage(decl.value, root);
 
     if (decl.important) {
