@@ -75,7 +75,7 @@ function inlineCSS(css, pathCSS, document) {
   var body = document.body;
   var remain = document.createElement("style");
   css = postcss.parse(css);
-  css.eachRule(function (rule) {
+  css.walkRules(function (rule) {
     var cssText;
 
     if (rule.parent.type !== "root") {
@@ -118,7 +118,7 @@ function inlineCSS(css, pathCSS, document) {
         elm.setAttribute("style", style + cssText);
       }
     });
-    rule.removeSelf();
+    rule.remove();
   });
 
   if (css.nodes.length > 0) {
