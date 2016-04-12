@@ -16,14 +16,6 @@
     "onecolor": "^2.5.0",
     "postcss": "^5.0.0"
   },
-  "devDependencies": {},
-  "files": [
-    "README.md",
-    "bin",
-    "index.js",
-    "package.json",
-    "test"
-  ],
   "homepage": "https://github.com/hail2u/node-inlining#readme",
   "keywords": [
     "css",
