@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
-const inlining = require("../");
+const inlining = require("..");
 
 const pkg = require("../package.json");
 const [binname] = Object.keys(pkg.bin);

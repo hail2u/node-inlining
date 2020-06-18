@@ -11,7 +11,7 @@
 	"files": [],
 	"main": "index.js",
 	"bin": {
-		"inlining": "bin/inlining"
+		"inlining": "bin/inlining.js"
 	},
 	"repository": {
 		"type": "git",
@@ -25,7 +25,7 @@
 		"postcss": "^7.0.32"
 	},
 	"scripts": {
-		"test": "eslint ./index.js ./bin/inlining"
+		"test": "eslint ./index.js ./bin/inlining.js"
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com/"
