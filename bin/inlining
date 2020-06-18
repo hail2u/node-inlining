@@ -1,61 +1,49 @@
 #!/usr/bin/env node
 
-"use strict";
+const fs = require("fs");
+const inlining = require("../");
 
-var fs = require("fs");
-
-var inlining = require("../");
-var pkg = require("../package.json");
-
-var binname = Object.keys(pkg.bin)[0];
-var html = process.argv[2];
+const pkg = require("../package.json");
+const [binname] = Object.keys(pkg.bin);
+const [,, html] = process.argv;
 
 switch (html) {
-case "--version":
-case "-v":
-  console.log(binname + " v" + pkg.version);
+	case "--version":
+	case "-v":
+		console.log(`${binname} v${pkg.version}`);
+		break;
 
-  break;
+	case "--help":
+	case "-h":
+		console.log(`Usage: ${binname} INPUT
 
-case "--help":
-case "-h":
-  console.log("Usage: " + binname + " INPUT");
-  console.log("");
-  console.log("Description:");
-  console.log("  " + pkg.description);
-  console.log("");
-  console.log("Options:");
-  console.log("  -h, --help     Show this message.");
-  console.log("  -v, --version  Print version information.");
-  console.log("");
-  console.log("Use a single dash for INPUT to read CSS from standard input.");
+Description:
+  ${pkg.description}
 
-  break;
+Options:
+  -h, --help     Show this message.
+  -v, --version  Print version information.
 
-case "-":
-  var stdin = process.openStdin();
-  html = "";
-  stdin.setEncoding("utf-8");
-  stdin.on("data", function (chunk) {
-    html += chunk;
-  });
-  stdin.on("end", function () {
-    inlining(
-      html,
-      function (res) {
-        console.log(res);
-      }
-    );
-  });
+Use a single dash for INPUT to read CSS from standard input.
+`);
+		break;
 
-  break;
+	case "-":
+		inlining(
+			fs.readFileSync(process.stdin.fd, "utf8"),
+			"index.html",
+			(res) => {
+				console.log(res);
+			}
+		);
+		break;
 
-default:
-  inlining(
-    fs.readFileSync(html, "utf8"),
-    html,
-    function (res) {
-      console.log(res);
-    }
-  );
+	default:
+		inlining(
+			fs.readFileSync(html, "utf8"),
+			html,
+			(res) => {
+				console.log(res);
+			}
+		);
 }

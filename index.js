@@ -1,191 +1,183 @@
-"use strict";
+const balanced = require("balanced-match");
+const fs = require("fs");
+const jsdom = require("jsdom");
+const mime = require("mime");
+const onecolor = require("onecolor");
+const path = require("path");
+const postcss = require("postcss");
 
-var balanced = require("balanced-match");
-var fs = require("fs");
-var jsdom = require("jsdom");
-var mime = require("mime");
-var onecolor = require("onecolor");
-var path = require("path");
-var postcss = require("postcss");
+const {
+	JSDOM
+} = jsdom;
+const {
+	list
+} = postcss;
 
-var list = postcss.list;
-
-function toDataURL(p) {
-  return "data:" + mime.lookup(p) + ";base64," +
-    fs.readFileSync(p).toString("base64");
+function toDataURL(filepath) {
+	return `data:${mime.getType(filepath)};base64,${fs.readFileSync(filepath).toString("base64")}`;
 }
 
 function inlineImage(value, root) {
-  var url = balanced("url(", ")", value);
-  var p;
+	const url = balanced("url(", ")", value);
 
-  if (url) {
-    p = url.body.replace(/^\s*("|')?\s*(.*)\s*\1\s*$/, "$2");
-    p = path.resolve(root, p);
+	if (!url) {
+		return value;
+	}
 
-    if (fs.existsSync(p)) {
-      url.body = toDataURL(p);
-    }
+	const filepath = path.resolve(root, url.body.replace(/^\s*("|')?\s*(.*)\s*\1\s*$/, "$2"));
 
-    value = url.pre + "url(" + url.body + ")" + url.post;
-  }
+	if (fs.existsSync(filepath)) {
+		url.body = toDataURL(filepath);
+	}
 
-  return value;
+	return `${url.pre}url(${url.body})${url.post}`;
+}
+
+function toHEXColor(value) {
+	if (
+		/^(rgb|hsl)a?\(.*\)$/i.test(value) ||
+		/^#[0-9a-f]{3}$/i.test(value)
+	) {
+		return onecolor(value).hex();
+	}
+
+	return value;
 }
 
 function normalizeColor(value) {
-  return list.space(value).map(function (v) {
-    if (
-      /^(rgb|hsl)a?\(.*\)$/i.test(v) ||
-      /^#[0-9a-f]{3}$/i.test(v)
-    ) {
-      return onecolor(v).hex();
-    }
-
-    return v;
-  }).join(" ");
+	return list.space(value).map(toHEXColor).join(" ");
 }
 
 function buildCSSText(decls, root) {
-  var cssText = "";
-  decls.forEach(function (decl) {
-    if (decl.type !== "decl") {
-      return;
-    }
+	let cssText = "";
+	decls.forEach((decl) => {
+		if (decl.type !== "decl") {
+			return;
+		}
 
-    cssText += decl.prop + ":" + list.comma(decl.value).map(function (v) {
-      v = normalizeColor(v);
-      v = inlineImage(v, root);
+		cssText += `${decl.prop}:${list.comma(decl.value).map((v) => inlineImage(normalizeColor(v), root)).join(",")}`;
 
-      return v;
-    }).join(",");
+		if (decl.important) {
+			cssText += " !important";
+		}
 
-    if (decl.important) {
-      cssText += " !important";
-    }
-
-    cssText += ";";
-  });
-
-  return cssText;
+		cssText += ";";
+	});
+	return cssText;
 }
 
 function inlineCSS(css, pathCSS, document) {
-  var dir = path.dirname(pathCSS);
-  var body = document.body;
-  var remain = document.createElement("style");
-  css = postcss.parse(css);
-  css.walkRules(function (rule) {
-    var cssText;
+	const dir = path.dirname(pathCSS);
+	const {body} = document;
+	const remain = document.createElement("style");
+	const root = postcss.parse(css);
+	root.walkRules((rule) => {
+		let cssText = "";
 
-    if (rule.parent.type !== "root") {
-      rule.nodes.forEach(function (decl) {
-        decl.value = inlineImage(decl.value, dir);
-      });
+		if (rule.parent.type !== "root") {
+			rule.nodes.forEach((decl) => {
+				decl.value = inlineImage(decl.value, dir);
+			});
 
-      return;
-    }
+			return;
+		}
 
-    cssText = buildCSSText(rule.nodes, dir);
-    list.comma(rule.selector).forEach(function (selector) {
-      var elms;
-      var l;
-      var i;
-      var elm;
-      var style;
+		cssText = buildCSSText(rule.nodes, dir);
+		list.comma(rule.selector).forEach((selector) => {
+			let elms = "";
+			let l = "";
+			let i = "";
+			let elm = "";
+			let style = "";
 
-      try {
-        elms = document.querySelectorAll(selector);
-      } catch (e) {
-        return;
-      }
+			try {
+				elms = document.querySelectorAll(selector);
+			} catch (e) {
+				return;
+			}
 
-      l = elms.length;
+			l = elms.length;
 
-      for (i = 0; i < l; i++) {
-        elm = elms[i];
+			for (i = 0; i < l; i++) {
+				elm = elms[i];
 
-        if (elm !== body && !body.contains(elm)) {
-          continue;
-        }
+				if (elm !== body && !body.contains(elm)) {
+					continue;
+				}
 
-        style = elm.getAttribute("style");
+				style = elm.getAttribute("style");
 
-        if (!style) {
-          style = "";
-        }
+				if (!style) {
+					style = "";
+				}
 
-        elm.setAttribute("style", style + cssText);
-      }
-    });
-    rule.remove();
-  });
+				elm.setAttribute("style", style + cssText);
+			}
+		});
+		rule.remove();
+	});
 
-  if (css.nodes.length > 0) {
-    remain.appendChild(document.createTextNode(css.toString()));
-    document.head.appendChild(remain);
-  }
+	if (root.nodes.length > 0) {
+		remain.appendChild(document.createTextNode(root.toString()));
+		document.head.appendChild(remain);
+	}
 
-  return document;
+	return document;
 }
 
-module.exports = function (html, pathHTML, callback) {
-  if (typeof pathHTML === "function") {
-    callback = pathHTML;
-    pathHTML = "index.html";
-  }
+module.exports = function (html, filepath, callback) {
+	const dom = new JSDOM(html);
+	let {
+		document
+	} = dom.window;
+	let elms = document.querySelectorAll("[style]");
+	let l = elms.length;
+	let i = 0;
+	let elm = "";
+	const links = document.querySelectorAll('link[rel="stylesheet"]');
+	let href = "";
+	const dir = path.dirname(filepath);
 
-  jsdom.env(html, function (errors, window) {
-    var document = window.document;
-    var elms = document.querySelectorAll("[style]");
-    var l = elms.length;
-    var i;
-    var elm;
-    var links = document.querySelectorAll('link[rel="stylesheet"]');
-    var href;
-    var dir = path.dirname(pathHTML);
+	for (; i < l; i++) {
+		elm = elms[i];
+		elm.setAttribute("_style", elm.getAttribute("style"));
+		elm.setAttribute("style", "");
+	}
 
-    for (i = 0; i < l; i++) {
-      elm = elms[i];
-      elm.setAttribute("_style", elm.getAttribute("style"));
-      elm.setAttribute("style", "");
-    }
+	l = links.length;
 
-    l = links.length;
+	for (i = 0; i < l; i++) {
+		elm = links[i];
+		href = path.resolve(dir, elm.href);
 
-    for (i = 0; i < l; i++) {
-      elm = links[i];
-      href = path.resolve(dir, elm.href);
+		if (fs.existsSync(href)) {
+			elm.parentNode.removeChild(elm);
+			document = inlineCSS(fs.readFileSync(href, "utf8"), href, document);
+		}
+	}
 
-      if (fs.existsSync(href)) {
-        elm.parentNode.removeChild(elm);
-        document = inlineCSS(fs.readFileSync(href, "utf8"), href, document);
-      }
-    }
+	l = elms.length;
 
-    l = elms.length;
+	for (i = 0; i < l; i++) {
+		elm = elms[i];
+		elm.setAttribute(
+			"style",
+			elm.getAttribute("style") + elm.getAttribute("_style")
+		);
+		elm.removeAttribute("_style");
+	}
 
-    for (i = 0; i < l; i++) {
-      elm = elms[i];
-      elm.setAttribute(
-        "style",
-        elm.getAttribute("style") + elm.getAttribute("_style")
-      );
-      elm.removeAttribute("_style");
-    }
+	elms = document.images;
+	l = elms.length;
 
-    elms = document.images;
-    l = elms.length;
+	for (i = 0; i < l; i++) {
+		elm = elms[i];
+		href = path.resolve(dir, elm.src.replace(/^file:\/\//, ""));
 
-    for (i = 0; i < l; i++) {
-      elm = elms[i];
-      href = path.resolve(dir, elm.src.replace(/^file:\/\//, ""));
+		if (fs.existsSync(href)) {
+			elm.src = toDataURL(href);
+		}
+	}
 
-      if (fs.existsSync(href)) {
-        elm.src = toDataURL(href);
-      }
-    }
-
-    callback(jsdom.serializeDocument(document));
-  });
+	callback(dom.serialize(document));
 };

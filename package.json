@@ -25,9 +25,12 @@
 		"postcss": "^7.0.32"
 	},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 0"
+		"test": "eslint ./index.js ./bin/inlining"
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com/"
+	},
+	"devDependencies": {
+		"eslint": "^7.2.0"
 	}
 }
