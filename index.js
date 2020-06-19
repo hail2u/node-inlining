@@ -34,10 +34,7 @@ function inlineImage(value, root) {
 }
 
 function toHEXColor(value) {
-	if (
-		/^(rgb|hsl)a?\(.*\)$/i.test(value) ||
-		/^#[0-9a-f]{3}$/i.test(value)
-	) {
+	if (/^#[0-9a-f]{3}$/i.test(value)) {
 		return onecolor(value).hex();
 	}
 
