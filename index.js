@@ -119,7 +119,7 @@ const inlineCSS = (css, filepath, document) => {
 	}
 };
 
-module.exports = (html, filepath, callback) => {
+module.exports = (html, filepath) => {
 	const dom = new JSDOM(html);
 	const {
 		document
@@ -158,5 +158,5 @@ module.exports = (html, filepath, callback) => {
 		}
 	}
 
-	callback(dom.serialize(document));
+	return dom.serialize(document);
 };

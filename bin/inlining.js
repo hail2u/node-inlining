@@ -1,15 +1,21 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
+const fs = require("fs/promises");
 const inlining = require("../index");
 
 const pkg = require("../package.json");
 
-const toSTDOUT = (res) => {
-	console.log(res);
+const readStream = (stream, encoding = "utf8") => {
+    stream.setEncoding(encoding);
+    return new Promise((resolve, reject) => {
+        const data = [];
+        stream.on("data", (chunk) => data.push(chunk));
+        stream.on("end", () => resolve(data.join("")));
+        stream.on("error", (error) => reject(error));
+    });
 };
 
-const main = () => {
+const main = async () => {
 	const [binname] = Object.keys(pkg.bin);
 	const file = process.argv.slice(2).shift();
 
@@ -34,19 +40,18 @@ Use a single dash for INPUT to read CSS from standard input.
 	}
 
 	if (file === "-") {
-		inlining(
-			fs.readFileSync(process.stdin.fd, "utf8"),
-			"index.html",
-			toSTDOUT
-		);
+		const html = await readStream(process.stdin, "utf8");
+		const inlined = await inlining(html, "index.html");
+		console.log(inlined);
 		return;
 	}
 
-	inlining(
-		fs.readFileSync(file, "utf8"),
-		file,
-		toSTDOUT
-	);
+	const html = await fs.readFile(file, "utf8");
+	const inlined = await inlining(html, file);
+	console.log(inlined);
 };
 
-main();
+main().catch((e) => {
+	console.trace(e);
+	process.exitCode = 1;
+});
