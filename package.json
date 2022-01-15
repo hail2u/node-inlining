@@ -22,7 +22,7 @@
 		"jsdom": "^16.2.2",
 		"mime": "^2.4.6",
 		"onecolor": "^3.1.0",
-		"postcss": "^7.0.32"
+		"postcss": "8.4.5"
 	},
 	"devDependencies": {
 		"eslint": "^7.2.0"
