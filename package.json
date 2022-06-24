@@ -1,6 +1,6 @@
 {
 	"name": "@hail2u/inlining",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Inline external CSS files referenced by link element to the HTML file",
 	"homepage": "https://github.com/hail2u/node-inlining",
 	"bugs": {
