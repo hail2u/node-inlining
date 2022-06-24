@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"balanced-match": "^1.0.0",
-		"jsdom": "^16.2.2",
+		"jsdom": "^16.5.0",
 		"mime": "^2.4.6",
 		"onecolor": "^3.1.0",
 		"postcss": "8.4.5"
