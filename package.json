@@ -18,14 +18,14 @@
 		"url": "git://github.com/hail2u/node-inlining.git"
 	},
 	"dependencies": {
-		"balanced-match": "^1.0.0",
-		"jsdom": "^16.5.0",
-		"mime": "^2.4.6",
+		"balanced-match": "1.0.2",
+		"jsdom": "16.7.0",
+		"mime": "2.6.0",
 		"onecolor": "^3.1.0",
 		"postcss": "8.4.5"
 	},
 	"devDependencies": {
-		"eslint": "^7.2.0"
+		"eslint": "7.32.0"
 	},
 	"scripts": {
 		"test": "eslint index.js bin/inlining.js"
